@@ -1,15 +1,19 @@
-// ai-excited-01 — "Aurora Phoenix".
-// Copies the entry image to the output directory. The program runs twice
-// and both runs must write the same bytes, so this is a plain deterministic
-// copy: no randomness, no network, no generated content at runtime.
-import { copyFileSync, mkdirSync } from "node:fs";
+// ai-excited-01 round 2 — "Glasswing Manta"
+// Copies the entry image (a colossal stained-glass manta ray soaring over a
+// night city, a tiny cyclist riding its slipstream) to the output directory.
+// Deterministic: the same bytes go out on every run.
+import { copyFileSync, mkdirSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-// The output filename is fixed by the competition contract: entry.png,
-// whatever the image bytes inside it are (PNG or JPEG by magic bytes).
-const outDir = process.env.MAKEFUN_OUTPUT_DIR ?? "/output";
 const repoDir = dirname(fileURLToPath(import.meta.url));
+const outDir = process.env.MAKEFUN_OUTPUT_DIR ?? "/output";
 
 mkdirSync(outDir, { recursive: true });
-copyFileSync(join(repoDir, "entry.png"), join(outDir, "entry.png"));
+const src = join(repoDir, "entry.png");
+const dest = join(outDir, "entry.png");
+copyFileSync(src, dest);
+// Guard the gate: the run must write exactly the image the repo holds.
+if (statSync(src).size !== statSync(dest).size) {
+  throw new Error("entry.png copy size mismatch");
+}
